@@ -36,13 +36,9 @@ To generate implementations, define `ARRAY_ALG_IMPLEMENTATION` in a C file and i
     #define ARRAY_ALG_IMPLEMENTATION
     #include "array_alg.h"
 
-Alternatively, you can include the algorithms as static functions to avoid the need for separate implementations:
 
-    #define ARRAY_ALG_STATIC
-    #define ARRAY_ALG_TYPE int
-    #define ARRAY_ALG_PREFIX intv_
-    #define ARRAY_ALG_IMPLEMENTATION
-    #include "array_alg.h"
+Alternatively, add `#define ARRAY_ALG_STATIC` before the original declaration
+to avoid the need for separate implementations.
 
 Repeat this process for each array type you want to use.
 
@@ -67,7 +63,7 @@ Remove duplicate entries:
 
 ## Design
 
-1. Iterators and Arrays
+### 1. Iterators and Arrays
 
 The C++ STL is designed around the concept of iterators.
 With iterators, one algorithm can be reused not just for multiple types, but also for many data structures.
@@ -79,7 +75,7 @@ For those cases where you do have a fancy data structure (graphs, trees, etc),
 copy its contents to an array, perform the algorithm, and then copy the contents back.
 This will often help it perform better anyway!
 
-2. Bounds vs counted ranges
+### 2. Bounds vs counted ranges
 
 STL algorithms typically operate on half-open ranges bounded by iterators [first, last).
 This convention is not used as often in C, but we think it offers some benefits.
@@ -90,7 +86,7 @@ Operations also compose a little easier.
 When a pointer is returned to an element of interest,
 that same pointer can be used as an argument for another algorithm.
 
-3. What's left out
+### 3. What's left out
 
 Because it's a bit verbose to define a C closure (function pointer and context), some STL algorithms are less useful in C.
 If an algorithm can be written as a simple for loop with no additional state or control flow, this library doesn't implement it.
@@ -103,7 +99,7 @@ If an algorithm can be written as a simple for loop with no additional state or 
 The algorithms which rely on ordered types always require a comparison function.
 We do not include any variants that operate on the `==` operator, as operators cannot be overloaded in C.
 
-4. Generics vs `void*`
+### 4. Generics vs `void*`
 
 Including a header multiple times with various `#define`s is a little cumbersome.
 However, we think it's a superior way to achieve C generics compared to the `void*` style used by `qsort` and `bsearch`.

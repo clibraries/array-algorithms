@@ -39,13 +39,8 @@ To generate implementations, define `ARRAY_ALG_IMPLEMENTATION` in a C file and i
     #define ARRAY_ALG_IMPLEMENTATION
     #include "array_alg.h"
 
-Alternatively, you can include the algorithms as static functions to avoid the need for separate implementations:
-
-    #define ARRAY_ALG_STATIC
-    #define ARRAY_ALG_TYPE int
-    #define ARRAY_ALG_PREFIX intv_
-    #define ARRAY_ALG_IMPLEMENTATION
-    #include "array_alg.h"
+Alternatively, add `#define ARRAY_ALG_STATIC` before the original declaration
+to avoid the need for separate implementations.
 
 Repeat this process for each array type you want to use.
 
