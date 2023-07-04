@@ -1,4 +1,4 @@
-/*
+/** \mainpage \ref array_alg.h
 Unintrusive algorithms for C arrays
 OR, a C implementation of <algorithm> from C++.
 
