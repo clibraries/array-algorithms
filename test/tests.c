@@ -590,19 +590,40 @@ void test_partial_sort() {
 }
 
 void test_partial_sort_copy() {
-    enum { N = 100 };
-    int nums[N];
-    for (int i = 0; i < N; ++i) {
-        nums[i] = i;
+    {
+        enum { N = 100 };
+        int nums[N];
+        for (int i = 0; i < N; ++i) {
+            nums[i] = i;
+        }
+
+        enum { M = 10 };
+        for (int iteration = 0; iteration < 1000; ++iteration) {
+            intv_random_shuffle(nums, nums + N);
+
+            int top[M];
+            intv_partial_sort_copy(nums, nums + N, top, top + M, compare_int, NULL);
+
+            for (int i = 0; i < M; ++i) {
+                assert(top[i] == i);
+            }
+        }
     }
+    {
+        enum { N = 10 };
+        int nums[N];
+        for (int i = 0; i < N; ++i) {
+            nums[i] = i;
+        }
+        intv_reverse(nums, nums + N);
 
-    for (int iteration = 0; iteration < 1000; ++iteration) {
-        intv_random_shuffle(nums, nums + N);
+        enum { M = 100 };
 
-        int top[10];
-        intv_partial_sort_copy(nums, nums + N, top, top + 10, compare_int, NULL);
+        int top[M];
+        int *out = intv_partial_sort_copy(nums, nums + N, top, top + M, compare_int, NULL);
+        assert(out == top + N);
 
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < N; ++i) {
             assert(top[i] == i);
         }
     }

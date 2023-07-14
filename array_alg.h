@@ -2127,31 +2127,36 @@ ALGDEF T *NS(partial_sort_copy)(
         void *compare_ctx
         )
 {
-    size_t n1 = last - first;
-    size_t n2 = out_last - out_first;
+    if (first == last || out_first == out_last) return out_first;
+    T *out = out_first;
+    *out = *first;
+    ++out;
+    ++first;
 
-    size_t n = (n2 < n1) ? n2 : n1;
-    out_last = out_first + n;
-
-    if (n == 0) { return out_last; }
-
-    NS(copy_n)(first, n, out_first);
-    first += n;
-
-    NS(make_heap_n)(out_first, n, compare, compare_ctx);
+    while (out != out_last)
+    {
+        if (first == last) {
+             NS(sort_heap)(out_first, out, compare, compare_ctx);
+             return out;
+        }
+        *out = *first;
+        ++first;
+        ++out;
+        NS(push_heap)(out_first, out, compare, compare_ctx);
+    }
 
     while (first != last)
     {
         if (compare(first, out_first, compare_ctx) < 0)
         {
-            NS(pop_heap_n)(out_first, n, compare, compare_ctx);
-            *(out_last - 1) = *first;
-            NS(push_heap_n)(out_first, n, compare, compare_ctx);
+            NS(pop_heap)(out_first, out, compare, compare_ctx);
+            *(out - 1) = *first;
+            NS(push_heap)(out_first, out, compare, compare_ctx);
         }
         ++first;
     }
-    NS(sort_heap)(out_first, out_last, compare, compare_ctx);
-    return out_last;
+    NS(sort_heap)(out_first, out, compare, compare_ctx);
+    return out;
 }
 
 ALGDEF void NS(nth_element)(
