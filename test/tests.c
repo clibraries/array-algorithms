@@ -589,6 +589,25 @@ void test_partial_sort() {
     }
 }
 
+void test_partial_sort_copy() {
+    enum { N = 100 };
+    int nums[N];
+    for (int i = 0; i < N; ++i) {
+        nums[i] = i;
+    }
+
+    for (int iteration = 0; iteration < 1000; ++iteration) {
+        intv_random_shuffle(nums, nums + N);
+
+        int top[10];
+        intv_partial_sort_copy(nums, nums + N, top, top + 10, compare_int, NULL);
+
+        for (int i = 0; i < 10; ++i) {
+            assert(top[i] == i);
+        }
+    }
+}
+
 typedef void (*SortFunc)(int*, int*, int (*cmp)(const int*, const int*, void*), void*);
 
 static inline
@@ -811,6 +830,7 @@ int main() {
     printf("-- test_sort_partition -- \n"); test_sort_partition();
     printf("-- test_nth_element --\n"); test_nth_element();
     printf("-- test_partial_sort --\n"); test_partial_sort();
+    printf("-- test_partial_sort_copy --\n"); test_partial_sort_copy();
     printf("-- test_heap_sort --\n"); test_heap_sort();
     printf("-- test_insertion_sort --\n"); test_insertion_sort();
     printf("-- test_stable_sort --\n"); test_stable_sort();
