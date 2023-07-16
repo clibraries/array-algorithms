@@ -25,4 +25,13 @@ typedef struct {
 #define ARRAY_ALG_PREFIX person_array_
 #include "../array_alg.h"
 
+// Import private functions for testing. 
+#define ARRAY_ALG_STATIC
+#define ARRAY_ALG_IMPLEMENTATION
+#define ARRAY_ALG_TYPE int
+#define ARRAY_ALG_PREFIX intv_private_
+#include "../array_alg.h"
+#undef ARRAY_ALG_IMPLEMENTATION
+#undef ARRAY_ALG_STATIC
+
 #endif // DEFS_H_

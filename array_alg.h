@@ -745,52 +745,6 @@ ALGDEF T* NS(insert_n)(
         size_t n
         );
 
-// == PRIVATE ==
-
-ALGDEF void NS(_insertion_sort_unguarded)(
-        T *restrict first,
-        T *last,
-        int (*compare)(const T*, const T*, void*),
-        void *compare_ctx
-        );
-
-ALGDEF void NS(_rotate_right_by_one)(
-        T *first,
-        T *last
-        );
-
-/// Hoare partitioning:
-/// https://en.wikipedia.org/wiki/Quicksort#Hoare_partition_scheme
-///
-/// Partially sorts [first, last) into two parts, divided
-/// by a pointer m such that:
-/// for all a in [first, m) and b in [m, last) a <= b.
-///
-/// requires:
-/// - first != last
-ALGDEF T *NS(_sort_partition)(
-        T *first,
-        T *last,
-        int (*compare)(const T*, const T*, void*),
-        void* compare_ctx
-        );
-
-ALGDEF T *NS(_quick_sort_early_stop)(
-        T *first,
-        T *last,
-        int (*compare)(const T*, const T*, void*),
-        void* compare_ctx
-        );
-
-ALGDEF T *NS(_merge_sort_adaptive_with_buffer_n)(
-        T* first,
-        size_t count,
-        T* buffer,
-        int (*compare)(const T* a, const T* b, void*),
-        void* compare_ctx
-        );
-
-
 #ifdef ARRAY_ALG_IMPLEMENTATION
 
 ALGDEF T *NS(find_if)(
@@ -1663,7 +1617,7 @@ typedef struct {
     void* compare_ctx;
 } NS(_lower_upper_bound_closure);
 
-ALGDEF int NS(_lower_bound_predicate)(const T* x, void* ctx) {
+static int NS(_lower_bound_predicate)(const T* x, void* ctx) {
     const NS(_lower_upper_bound_closure)* c = ctx;
     return c->compare(x, c->value, c->compare_ctx) < 0;
 }
@@ -1684,8 +1638,7 @@ ALGDEF T *NS(lower_bound)(
     return NS(partition_point)(first, last, NS(_lower_bound_predicate), &ctx);
 }
 
-
-ALGDEF int NS(_upper_bound_predicate)(const T* x, void* ctx) {
+static int NS(_upper_bound_predicate)(const T* x, void* ctx) {
     const NS(_lower_upper_bound_closure)* c = ctx;
     return c->compare(c->value, x, c->compare_ctx) >= 0;
 }
@@ -1963,7 +1916,7 @@ ALGDEF void NS(sort_heap)(
     }
 }
 
-ALGDEF void NS(_insertion_sort_unguarded)(
+static void NS(_insertion_sort_unguarded)(
         T *restrict first,
         T *last,
         int (*compare)(const T*, const T*, void*),
@@ -2006,7 +1959,16 @@ ALGDEF void NS(insertion_sort)(
     NS(_insertion_sort_unguarded)(suffix, last, compare, compare_ctx);
 }
 
-ALGDEF T* NS(_sort_partition)(
+/// Hoare partitioning:
+/// https://en.wikipedia.org/wiki/Quicksort#Hoare_partition_scheme
+///
+/// Partially sorts [first, last) into two parts, divided
+/// by a pointer m such that:
+/// for all a in [first, m) and b in [m, last) a <= b.
+///
+/// requires:
+/// - first != last
+static T* NS(_sort_partition)(
         T *first,
         T *last,
         int (*compare)(const T*, const T*, void*),
@@ -2036,7 +1998,7 @@ ALGDEF T* NS(_sort_partition)(
     }
 }
 
-ALGDEF T *NS(_quick_sort_early_stop)(
+static T *NS(_quick_sort_early_stop)(
         T *first,
         T *last,
         int (*compare)(const T*, const T*, void*),
@@ -2067,7 +2029,7 @@ ALGDEF void NS(sort)(
     NS(_insertion_sort_unguarded)(first, last, compare, compare_ctx);
 }
 
-ALGDEF void NS(_rotate_right_by_one)(
+static void NS(_rotate_right_by_one)(
         T *first,
         T *last
         ) {
@@ -2097,7 +2059,7 @@ ALGDEF void NS(insertion_sort_stable)(
     NS(_insertion_sort_unguarded)(suffix, last, compare, compare_ctx);
 }
 
-ALGDEF T *NS(_merge_sort_adaptive_with_buffer_n)(
+static T *NS(_merge_sort_adaptive_with_buffer_n)(
         T* first,
         size_t count,
         T* buffer,

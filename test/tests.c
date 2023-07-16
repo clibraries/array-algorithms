@@ -566,7 +566,7 @@ void test_sort_partition() {
             nums[i] = ARRAY_ALG_RANDOM(100);
         }
 
-        int* part = intv__sort_partition(nums, nums + N, compare_int, NULL);
+        int* part = intv_private__sort_partition(nums, nums + N, compare_int, NULL);
         if (!intv_all_of(nums, part, _is_less_equal_than, part)) {
             print_array(nums, N);
             printf("partition: %d\n", *part);
@@ -878,11 +878,9 @@ int main() {
     printf("-- test_sort --\n"); test_sort();
     printf("-- test_c_qsort --\n"); test_c_qsort();
 
-
     // EXTENSIONS
     printf("-- test_is_strictly_increasing --\n"); test_is_strictly_increasing();
     printf("-- test_insert--\n"); test_insert();
-
 
     // BENCHMARKS
     printf("BENCHMARKS\n");
