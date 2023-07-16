@@ -441,11 +441,36 @@ ALGDEF T *NS(partition)(
         void *predicate_ctx
         );
 
-ALGDEF T *NS(partition_copy)(
+/// Partition a range by copying the elements that satisfy a predicate into one buffer,
+/// and the ones that fail to another.
+/// Note that this function is stable.
+ALGDEF void NS(partition_copy)(
         const T *first,
         const T *last,
-        T *restrict out_false,
-        T *restrict out_true,
+        T **out_true,
+        T **out_false,
+        int (*predicate)(const T*, void*),
+        void *predicate_ctx
+        );
+
+/// Calls malloc.
+ALGDEF T *NS(stable_partition)(
+        T *first,
+        T *last,
+        int (*predicate)(const T*, void*),
+        void *predicate_ctx
+        );
+
+/// Like above, but does not call `malloc`.
+/// You must provide a buffer.
+/// requires:
+/// - sizeof(buffer) >= the number of false entries in the range [first, last)
+//    Note that sizeof(buffer) >= last - first will be sufficient.
+
+ALGDEF T *NS(stable_partition_with_buffer)(
+        T *first,
+        T *last,
+        T *buffer,
         int (*predicate)(const T*, void*),
         void *predicate_ctx
         );
@@ -644,8 +669,7 @@ ALGDEF void NS(insertion_sort_stable)(
 
 /// Sort an array in a stable way with a merge sort variety.
 /// By stable, we mean that the order of equivalent elements is preserved.
-/// Note this function allocates memory with malloc.
-
+/// Calls malloc.
 ALGDEF void NS(stable_sort)(
         T* first,
         T* last,
@@ -653,8 +677,8 @@ ALGDEF void NS(stable_sort)(
         void* compare_ctx
         );
 
-/// Like above, but does not call `malloc`.
-/// You provide a buffer.`
+/// Like above, but does not call malloc.
+/// You must provide a buffer.
 /// requires:
 /// - sizeof(buffer) >= (last - first) / 2
 ALGDEF void NS(stable_sort_with_buffer)(
@@ -765,6 +789,7 @@ ALGDEF T *NS(_merge_sort_adaptive_with_buffer_n)(
         int (*compare)(const T* a, const T* b, void*),
         void* compare_ctx
         );
+
 
 #ifdef ARRAY_ALG_IMPLEMENTATION
 
@@ -1515,11 +1540,41 @@ ALGDEF T *NS(partition)(
     return out;
 }
 
-ALGDEF T *NS(partition_copy)(
+ALGDEF T *NS(stable_partition_with_buffer)(
+        T *first,
+        T *last,
+        T *buffer,
+        int (*predicate)(const T*, void*),
+        void *predicate_ctx
+        )
+{
+    T *out_false = buffer;
+    T *out_true = first;
+    NS(partition_copy)(first, last, &out_true, &out_false, predicate, predicate_ctx);
+    memcpy(out_true, buffer, sizeof(T) * (out_false - buffer));
+    return out_true;
+}
+
+ALGDEF T *NS(stable_partition)(
+        T *first,
+        T *last,
+        int (*predicate)(const T*, void*),
+        void *predicate_ctx
+        )
+{
+    // TODO: this is not the best implementation 
+    if (first == last) return last;
+    T *buffer = malloc((last - first) * sizeof(T));
+    T *point = NS(stable_partition_with_buffer)(first, last, buffer, predicate, predicate_ctx);
+    free(buffer);
+    return point;
+}
+
+ALGDEF void NS(partition_copy)(
         const T *first,
         const T *last,
-        T *restrict out_false,
-        T *restrict out_true,
+        T **out_true,
+        T **out_false,
         int (*predicate)(const T*, void*),
         void *predicate_ctx
         ) {
@@ -1528,18 +1583,18 @@ ALGDEF T *NS(partition_copy)(
     {
         if (predicate(first, predicate_ctx))
         {
-            *out_true = *first;
-            ++out_true;
+            *(*out_true) = *first;
+            ++(*out_true);
         }
         else
         {
-            *out_false = *first;
-            ++out_false;
+            *(*out_false) = *first;
+            ++(*out_false);
         }
         ++first;
     }
-    return out_false;
 }
+
 
 ALGDEF T *NS(partition_point_n)(
         const T *first,

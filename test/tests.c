@@ -390,14 +390,33 @@ void test_partition(void) {
         int numbers[] = { 1, 2, 3, 4, 5, 6};
         int odd[3];
         int even[3];
-        int* false_end = intv_partition_copy(numbers, numbers + 6, odd, even, pred_is_even, NULL);
 
-        assert(false_end - odd == 3);
+
+        int *out_odd = odd;
+        int *out_even = even;
+
+        intv_partition_copy(numbers, numbers + 6, &out_even, &out_odd, pred_is_even, NULL);
+
+        assert(out_odd - odd == 3);
+        assert(out_even - even == 3);
 
         for (int i = 0; i < 3; ++i) {
             assert(odd[i] % 2 == 1); 
             assert(even[i] % 2 == 0); 
         }
+    }
+}
+
+void test_stable_partition(void) {
+    int numbers[] = { 1, 2, 3, 4, 5, 6};
+    int *point = intv_stable_partition(numbers, numbers + 6, pred_is_even, NULL);
+
+    assert(point - numbers == 3);
+
+    int expected[] = { 2, 4, 6, 1, 3, 5 };
+
+    for (int i = 0; i < ARRAY_LEN(numbers); ++i) {
+        assert(numbers[i] == expected[i]);
     }
 }
 
@@ -840,6 +859,7 @@ int main() {
     printf("-- test_minmax --\n"); test_minmax();
     printf("-- test_minmax_element --\n"); test_minmax_element();
     printf("-- test_partition --\n"); test_partition();
+    printf("-- test_stable_partition --\n"); test_stable_partition();
     printf("-- test_is_sorted --\n"); test_is_sorted();
     printf("-- test_binary_search --\n"); test_binary_search();
     printf("-- test_permutation --\n"); test_permutation();
